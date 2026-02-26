@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FileFlow — Experimental Demo</title>
+
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --fg: #e6e9ef;
+      --muted: #9aa3b2;
+      --accent: #6cf2c2;
+      --danger: #ff6b6b;
+      --line: rgba(255,255,255,0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); }
+
+    body {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    main {
+      padding: 48px 56px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 48px;
+    }
+
+    header h1 {
+      font-size: clamp(2.6rem, 4vw, 4.2rem);
+      line-height: 1.05;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+
+    header p {
+      max-width: 640px;
+      color: var(--muted);
+      margin-top: 16px;
+      font-size: 1.05rem;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      text-align: left;
+      padding: 6px 0;
+      cursor: pointer;
+    }
+
+    nav button.active {
+      color: var(--fg);
+    }
+
+    .status {
+      margin-top: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: grid;
+      gap: 6px;
+    }
+
+    section {
+      display: none;
+      animation: fade 240ms ease-out;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .event {
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .event::before {
+      content: "";
+      position: absolute;
+      left: -4px;
+      top: 6px;
+      width: 9px;
+      height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .event h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .event p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 680px;
+    }
+
+    .terminal {
+      border: 1px solid var(--line);
+      padding: 24px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .terminal .prompt { color: var(--accent); }
+    .terminal .err { color: var(--danger); }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 900px;
+    }
+
+    form textarea {
+      grid-column: 1 / -1;
+      min-height: 160px;
+    }
+
+    input, textarea {
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 4px;
+      color: var(--fg);
+      font-family: var(--sans);
+      font-size: 0.95rem;
+    }
+
+    button.submit {
+      grid-column: 1 / -1;
+      margin-top: 24px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 14px 20px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <aside>
+    <strong>FileFlow</strong>
+    <nav>
+      <button data-view="overview" class="active">/overview</button>
+      <button data-view="process">/process</button>
+      <button data-view="runtime">/runtime</button>
+      <button data-view="contact">/contact</button>
+    </nav>
+
+    <div class="status">
+      <div>env: local</div>
+      <div>ui: html-native</div>
+      <div>state: deterministic</div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <h1>Systems you can reason about.</h1>
+      <p>
+        This demo explores a non-marketing interface: time-based narrative,
+        deterministic navigation, and observable execution paths.
+      </p>
+    </header>
+
+    <section id="overview" class="active">
+      <div class="timeline">
+        <div class="event">
+          <h3>Constraint-first design</h3>
+          <p>Interfaces emerge from operational limits, not visual trends.</p>
+        </div>
+        <div class="event">
+          <h3>Explicit state</h3>
+          <p>No hidden flows. Every interaction produces a traceable outcome.</p>
+        </div>
+        <div class="event">
+          <h3>Longevity bias</h3>
+          <p>Systems optimized for years of iteration, not launches.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="process">
+      <div class="timeline">
+        <div class="event">
+          <h3>Discovery</h3>
+          <p>Inputs, risks, and non-goals are captured before visuals exist.</p>
+        </div>
+        <div class="event">
+          <h3>System modeling</h3>
+          <p>Navigation, data ownership, and failure states are defined.</p>
+        </div>
+        <div class="event">
+          <h3>Implementation</h3>
+          <p>HTML, CSS, and minimal JS — no framework dependency.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="runtime">
+      <div class="terminal" id="runtimeLog">
+        <div><span class="prompt">$</span> boot system</div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <form id="contactForm">
+        <input name="name" placeholder="Name" required />
+        <input name="email" placeholder="Email" required />
+        <input name="company" placeholder="Company" />
+        <input name="budget" placeholder="Budget range" />
+        <textarea name="details" placeholder="Project context"></textarea>
+        <button class="submit" type="submit">Transmit</button>
+      </form>
+    </section>
+
+    <footer>
+      <span>FileFlow demo system</span>
+      <span>© 2026</span>
+    </footer>
+  </main>
+
+  <script>
+    const buttons = document.querySelectorAll('nav button');
+    const sections = document.querySelectorAll('section');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.view).classList.add('active');
+      });
+    });
+
+    const log = document.getElementById('runtimeLog');
+    const append = (msg, cls) => {
+      const div = document.createElement('div');
+      if (cls) div.classList.add(cls);
+      div.innerHTML = msg;
+      log.appendChild(div);
+    };
+
+    append('<span class="prompt">$</span> load modules');
+    append('<span class="prompt">$</span> ui ready');
+
+    document.getElementById('contactForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      append('<span class="prompt">$</span> submit contact payload');
+
+      try {
+        const form = new FormData(e.target);
+        await fetch('/', { method: 'POST', body: form });
+        append('<span class="prompt">$</span> submission accepted');
+      } catch {
+        append('<span class="err">error:</span> network unavailable');
+      }
+    });
+  </script>
+</body>
+</html>
