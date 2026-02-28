@@ -5,199 +5,268 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FileFlow — Experimental Demo</title>
 
-  <style>
-    :root {
-      --bg: #0b0e14;
-      --fg: #e6e9ef;
-      --muted: #9aa3b2;
-      --accent: #6cf2c2;
-      --danger: #ff6b6b;
-      --line: rgba(255,255,255,0.08);
-      --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-      --sans: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
-    }
+ <style>
+  :root {
+    --bg: #0b0e14;
+    --fg: #e6e9ef;
+    --muted: #9aa3b2;
+    --accent: #6cf2c2;
+    --danger: #ff6b6b;
+    --line: rgba(255,255,255,0.08);
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
+  }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+  }
+
+  /* ===== Layout ===== */
+
+  body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  aside {
+    border-right: 1px solid var(--line);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  main {
+    padding: 48px 56px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 48px;
+  }
+
+  /* ===== Typography ===== */
+
+  header h1 {
+    font-size: clamp(2rem, 6vw, 4.2rem);
+    line-height: 1.05;
+    margin: 0;
+    letter-spacing: -0.03em;
+  }
+
+  header p {
+    max-width: 640px;
+    color: var(--muted);
+    margin-top: 16px;
+    font-size: 1.05rem;
+  }
+
+  /* ===== Nav ===== */
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    text-align: left;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  nav button.active {
+    color: var(--fg);
+  }
+
+  .status {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: grid;
+    gap: 6px;
+  }
+
+  /* ===== Sections ===== */
+
+  section {
+    display: none;
+    animation: fade 240ms ease-out;
+  }
+
+  section.active {
+    display: block;
+  }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Timeline ===== */
+
+  .timeline {
+    display: grid;
+    gap: 28px;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .event {
+    padding-left: 24px;
+    position: relative;
+  }
+
+  .event::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .event h3 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .event p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    max-width: 680px;
+  }
+
+  /* ===== Terminal ===== */
+
+  .terminal {
+    border: 1px solid var(--line);
+    padding: 24px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    background: rgba(255,255,255,0.02);
+    overflow-x: auto;
+  }
+
+  .terminal .prompt { color: var(--accent); }
+  .terminal .err { color: var(--danger); }
+
+  /* ===== Form ===== */
+
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 900px;
+  }
+
+  form textarea {
+    grid-column: 1 / -1;
+    min-height: 160px;
+  }
+
+  input, textarea {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 4px;
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  button.submit {
+    grid-column: 1 / -1;
+    margin-top: 24px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 14px 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ========================= */
+  /* ===== MOBILE FIX ======== */
+  /* ========================= */
+
+  @media (max-width: 900px) {
 
     body {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      min-height: 100vh;
+      grid-template-columns: 1fr;
     }
 
     aside {
-      border-right: 1px solid var(--line);
-      padding: 24px;
-      display: flex;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
       flex-direction: column;
-      gap: 24px;
-    }
-
-    main {
-      padding: 48px 56px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 48px;
-    }
-
-    header h1 {
-      font-size: clamp(2.6rem, 4vw, 4.2rem);
-      line-height: 1.05;
-      margin: 0;
-      letter-spacing: -0.03em;
-    }
-
-    header p {
-      max-width: 640px;
-      color: var(--muted);
-      margin-top: 16px;
-      font-size: 1.05rem;
+      gap: 16px;
     }
 
     nav {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      font-family: var(--mono);
-      font-size: 0.9rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     nav button {
-      background: none;
-      border: none;
-      color: var(--muted);
-      text-align: left;
-      padding: 6px 0;
-      cursor: pointer;
-    }
-
-    nav button.active {
-      color: var(--fg);
+      padding: 6px 8px;
     }
 
     .status {
-      margin-top: auto;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--muted);
-      display: grid;
-      gap: 6px;
-    }
-
-    section {
       display: none;
-      animation: fade 240ms ease-out;
     }
 
-    section.active {
-      display: block;
+    main {
+      padding: 32px 20px;
+      gap: 32px;
     }
-
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .timeline {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 28px;
-      position: relative;
-    }
-
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background: var(--line);
-    }
-
-    .event {
-      padding-left: 24px;
-      position: relative;
-    }
-
-    .event::before {
-      content: "";
-      position: absolute;
-      left: -4px;
-      top: 6px;
-      width: 9px;
-      height: 9px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-
-    .event h3 {
-      margin: 0;
-      font-size: 1.15rem;
-    }
-
-    .event p {
-      margin: 8px 0 0;
-      color: var(--muted);
-      max-width: 680px;
-    }
-
-    .terminal {
-      border: 1px solid var(--line);
-      padding: 24px;
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      line-height: 1.6;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .terminal .prompt { color: var(--accent); }
-    .terminal .err { color: var(--danger); }
 
     form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      max-width: 900px;
-    }
-
-    form textarea {
-      grid-column: 1 / -1;
-      min-height: 160px;
-    }
-
-    input, textarea {
-      background: none;
-      border: none;
-      border-bottom: 1px solid var(--line);
-      padding: 10px 4px;
-      color: var(--fg);
-      font-family: var(--sans);
-      font-size: 0.95rem;
+      grid-template-columns: 1fr;
     }
 
     button.submit {
-      grid-column: 1 / -1;
-      margin-top: 24px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 14px 20px;
-      font-weight: 600;
-      cursor: pointer;
+      margin-top: 12px;
     }
+  }
 
-    footer {
-      border-top: 1px solid var(--line);
-      padding-top: 24px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-    }
-  </style>
+</style>
 </head>
 <body>
 
